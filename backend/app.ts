@@ -12,7 +12,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 });
 
 if (require.main === module) {
-  app.listen(3000, () => {
-    console.log('Express started on port 3000');
+  app.listen(8080, () => {
+    console.log('Express started on port http://localhost:8080');
   });
 }
