@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { products } from '../db.json';
 
-const paginate = (array: object[], page: number, limit: number) => {
+const paginate = (array: object[], page: number, limit: number): object => {
   const offset = Math.floor((page - 1) * limit);
   const total = array.length || 0;
   const pages = Math.ceil(total / limit);
