@@ -1,18 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { users } from '../db.json';
+import { DB } from '../db-init';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
+  const users = await DB.userRepository.findAll();
   res.json(users);
 });
 
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
-  const user = users.find((f) => {
-    return f.id === id;
-  });
+  const user = await DB.userRepository.findOne({ id });
 
   if (!user) {
     res.status(404).json({

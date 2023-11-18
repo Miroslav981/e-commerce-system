@@ -1,34 +1,19 @@
 import { Router, Request, Response } from 'express';
-import { products } from '../db.json';
-
-const paginate = (array: object[], page: number, limit: number): object => {
-  const offset = Math.floor((page - 1) * limit);
-  const total = array.length || 0;
-  const pages = Math.ceil(total / limit);
-
-  const result = [...array].slice(offset, (offset + limit));
-
-  return {
-    totalPages: pages,
-    records: result,
-    page,
-    offset,
-    limit,
-    totalRecords: total
-  };
-};
+import paginate from '../libs/paginate';
+import { DB } from '../db-init';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   const sortByPrice = req.query.sortBy === 'price';
   const page = Number(req.query.page || 1);
+  const products = await DB.productRepository.findAll();
   let list = products;
 
   if (sortByPrice) {
     list = [...products].sort((a,b) => {
-      const priceA = parseFloat(a.price);
-      const priceB = parseFloat(b.price);
+      const priceA = parseFloat(String(a.price));
+      const priceB = parseFloat(String(b.price));
 
       if (priceA === priceB) {
         return 0;
@@ -41,12 +26,10 @@ router.get('/', (req: Request, res: Response) => {
   res.json(paginate(list, page, 10));
 });
 
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
-  const product = products.find((f) => {
-    return f.id === id;
-  });
+  const product =  await DB.productRepository.findOne({ id });
 
   if (!product) {
     res.status(404).json({
