@@ -1,0 +1,7 @@
+{
+  "name": "example-e-commerce",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
