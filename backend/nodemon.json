@@ -2,5 +2,5 @@
     "verbose": false,
     "ignore": ["*.test.js", "**/fixtures/**"],
     "ext": "*.ts",
-    "exec": "tsc && ts-node app.ts"
+    "exec": "tsc && ts-node app.ts || exit 1"
   }

@@ -7,8 +7,11 @@ import { passwordHash } from '../helpers/password-hash';
 const router = Router();
 
 router.get('/login', async (req: Request, res: Response) => {
-  const login = String(req.query.login);
-  const password = String(req.query.password);
+  const login = <string>req.query.login || undefined;
+  const password = <string>req.query.password || undefined;
+  if (!login || !password) {
+    throw new Error('Missing parameters login or password');
+  }
 
   const auth = await getToken({ login, password, rememberMe: false });
 
@@ -19,12 +22,18 @@ router.get('/login', async (req: Request, res: Response) => {
 });
 
 router.get('/register', async (req: Request, res: Response) => {
-  const name = String(req.query.name);
-  const email = String(req.query.email);
-  const password = String(req.query.password);
+  const name: string = <string>req.query.name || undefined;
+  const email: string = <string>req.query.email || undefined;
+  const password: string = <string>req.query.password || undefined;
 
   if (!name || !email || !password) {
     throw new Error('Missing parameters name, email or password');
+  }
+
+  const exists: User = await DB.userRepository.findOne({ email: email });
+
+  if (exists) {
+    throw new Error('Email address is already used!');
   }
 
   const user: User = new User();
