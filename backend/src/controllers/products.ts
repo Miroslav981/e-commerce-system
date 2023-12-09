@@ -1,29 +1,43 @@
 import { Router, Request, Response } from 'express';
-import paginate from '../libs/paginate';
+import paginate from '../helpers/paginate';
 import { DB } from '../db-init';
 
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
-  const sortByPrice = req.query.sortBy === 'price';
+  const sortByPrice = String(req.query.sortBy)
+    .toLowerCase() === 'price';
+  const sortByPriceAsc = String(req.query.sortBy)
+    .toLowerCase() === 'priceasc';
+  const sortByPriceDesc = String(req.query.sortBy)
+    .toLowerCase() === 'pricedesc';
   const page = Number(req.query.page || 1);
-  const products = await DB.productRepository.findAll();
-  let list = products;
 
-  if (sortByPrice) {
-    list = [...products].sort((a,b) => {
-      const priceA = parseFloat(String(a.price));
-      const priceB = parseFloat(String(b.price));
+  let orderBy: object = {
+    id: 'DESC'
+  };
 
-      if (priceA === priceB) {
-        return 0;
-      }
+  const total = await DB.productRepository.count();
 
-      return priceA < priceB ? -1 : 1;
-    });
+  if (sortByPrice || sortByPriceDesc || sortByPriceAsc) {
+    orderBy = {
+      price: sortByPriceDesc ? 'DESC' : 'ASC'
+    };
   }
 
-  res.json(paginate(list, page, 10));
+  const pagi = paginate(total, page, 10);
+
+  const products = await DB.productRepository.findAll({
+    orderBy,
+    limit: pagi.limit,
+    offset: pagi.offset
+  });
+
+  res.json({
+    totalRecords: total,
+    records: products,
+    ...pagi
+  });
 });
 
 router.get('/:id', async (req: Request, res: Response) => {

@@ -1,17 +1,15 @@
 import { Factory, Faker } from '@mikro-orm/seeder';
 import { User } from '../entities';
-import { createHash } from 'crypto';
+import { passwordHash } from '../helpers/password-hash';
 
 export class UserFactory extends Factory<User> {
   model = User;
 
   definition(faker: Faker): Partial<User> {
-    const password = createHash('sha256')
-      .update(faker.random.alphaNumeric(8))
-      .digest('hex');
+    const password = passwordHash(faker.internet.password());
     return {
       name: faker.internet.userName(),
-      email: faker.internet.exampleEmail(),
+      email: faker.internet.exampleEmail().toLocaleLowerCase(),
       password: password,
     };
   }
